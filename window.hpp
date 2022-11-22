@@ -1,4 +1,7 @@
 #include <SFML/Graphics.hpp>
+#include "ant.hpp"
+
+#include <vector>
 
 const int WINDOW_HEIGHT = 1000;
 const int WINDOW_WIDTH = 1500;
@@ -16,8 +19,12 @@ public:
   void update() {
     this->pollEvents();
   }
-  void render() {
+  void render(std::vector<Ant> ants) {
     this->window->clear(this->colBG);
+    
+    for (int i=0; i<ants.size(); i++) {
+      this->window->draw(ants[i].getSprite());
+    }
     
     this->window->display();
   }
