@@ -18,6 +18,7 @@ public:
   
   void update() {
     this->pollEvents();
+    this->updateMouse();
   }
   void render(std::vector<Ant> ants) {
     this->window->clear(this->colBG);
@@ -36,6 +37,9 @@ private:
   sf::VideoMode videoMode;
   sf::RenderWindow *window;
   sf::Event event;
+  
+  sf::Vector2i mousePosView;
+  sf::Vector2f mousePosWindow;
   
   sf::Color colBG = sf::Color(26, 26, 26, 255);
   
@@ -66,5 +70,10 @@ private:
           break;
       }
     }
+  }
+  
+  void updateMouse() {
+    this->mousePosView = sf::Mouse::getPosition(*this->window);
+    this->mousePosWindow = this->window->mapPixelToCoords(this->mousePosView);
   }
 };
