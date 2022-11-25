@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include "ant.hpp"
+#include "food.hpp"
 
 #include <vector>
 
@@ -18,13 +19,18 @@ public:
   
   void update() {
     this->pollEvents();
-    this->updateMouse();
+    // this->updateMouse();
   }
-  void render(std::vector<Ant> ants) {
+  void render(std::vector<Food> foods, std::vector<Ant> ants) {
     this->window->clear(this->colBG);
+    
+    for (int i=0; i<foods.size(); i++) {
+      this->window->draw(foods[i].getCircle());
+    }
     
     for (int i=0; i<ants.size(); i++) {
       this->window->draw(ants[i].getSprite());
+      this->window->draw(ants[i].getCircle());
     }
     
     this->window->display();
@@ -38,8 +44,8 @@ private:
   sf::RenderWindow *window;
   sf::Event event;
   
-  sf::Vector2i mousePosView;
-  sf::Vector2f mousePosWindow;
+  // sf::Vector2i mousePosView;
+  // sf::Vector2f mousePosWindow;
   
   sf::Color colBG = sf::Color(26, 26, 26, 255);
   
@@ -72,8 +78,8 @@ private:
     }
   }
   
-  void updateMouse() {
-    this->mousePosView = sf::Mouse::getPosition(*this->window);
-    this->mousePosWindow = this->window->mapPixelToCoords(this->mousePosView);
-  }
+  // void updateMouse() {
+  //   this->mousePosView = sf::Mouse::getPosition(*this->window);
+  //   this->mousePosWindow = this->window->mapPixelToCoords(this->mousePosView);
+  // }
 };
