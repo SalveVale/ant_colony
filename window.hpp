@@ -21,7 +21,7 @@ public:
     this->pollEvents();
     // this->updateMouse();
   }
-  void render(std::vector<Food> foods, std::vector<Ant> ants) {
+  void render(std::vector<Food> foods, std::vector<Ant> ants, std::vector<Pharamone> wanderPharamones, std::vector<Pharamone> foodPharamones) {
     this->window->clear(this->colBG);
     
     for (int i=0; i<foods.size(); i++) {
@@ -31,6 +31,17 @@ public:
     for (int i=0; i<ants.size(); i++) {
       this->window->draw(ants[i].getSprite());
       this->window->draw(ants[i].getCircle());
+      if (ants[i].hasFood) {
+        this->window->draw(ants[i].getFood());
+      }
+    }
+    
+    for (int i=0; i<wanderPharamones.size(); i++) {
+      this->window->draw(wanderPharamones[i].getCircle());
+    }
+    
+    for (int i=0; i<foodPharamones.size(); i++) {
+      this->window->draw(foodPharamones[i].getCircle());
     }
     
     this->window->display();
