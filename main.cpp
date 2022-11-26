@@ -3,10 +3,16 @@
 #include "food.hpp"
 #include "pharamone.hpp"
 
-const float visionRadius = 30.f;
+const float VISION_RADIUS = 40.f;
+const sf::Color WALL_COLOR = sf::Color(10, 10, 10, 255);
+
+std::vector<sf::RectangleShape> initWalls(std::vector<sf::RectangleShape>& vec);
 
 int main() {
   Window window;
+  
+  std::vector<sf::RectangleShape> walls;
+  initWalls(walls);
   
   std::vector<Food> foods;
   for(int i=0; i<5; i++) {
@@ -17,8 +23,8 @@ int main() {
   }
   
   std::vector<Ant> ants;
-  for (int i=0; i<50; i++) {
-    Ant *ant = new Ant(700, 500, visionRadius);
+  for (int i=0; i<75; i++) {
+    Ant *ant = new Ant(700, 500, VISION_RADIUS);
     ants.push_back(*ant);
   }
   
@@ -29,7 +35,7 @@ int main() {
     window.update();
     
     for (int i=0; i<ants.size(); i++) {
-      ants[i].update(foods, wanderPharamones, foodPharamones);
+      ants[i].update(foods, wanderPharamones, foodPharamones, walls);
     }
     
     for (int i=0; i<wanderPharamones.size(); i++) {
@@ -44,8 +50,36 @@ int main() {
       }
     }
     
-    window.render(foods, ants, wanderPharamones, foodPharamones);
+    window.render(foods, ants, wanderPharamones, foodPharamones, walls);
   }
   
   return 0;
+}
+
+std::vector<sf::RectangleShape> initWalls(std::vector<sf::RectangleShape>& vec) {
+  sf::RectangleShape wall1;
+  wall1.setPosition(0, 0);
+  wall1.setSize(sf::Vector2f(20, 1080));
+  wall1.setFillColor(WALL_COLOR);
+  vec.push_back(wall1);
+
+  sf::RectangleShape wall2;
+  wall2.setPosition(0, 0);
+  wall2.setSize(sf::Vector2f(1920, 20));
+  wall2.setFillColor(WALL_COLOR);
+  vec.push_back(wall2);
+
+  sf::RectangleShape wall3;
+  wall3.setPosition(1920, 1060);
+  wall3.setSize(sf::Vector2f(-1920, 20));
+  wall3.setFillColor(WALL_COLOR);
+  vec.push_back(wall3);
+
+  sf::RectangleShape wall4;
+  wall4.setPosition(1900, 1080);
+  wall4.setSize(sf::Vector2f(20, -1080));
+  wall4.setFillColor(WALL_COLOR);
+  vec.push_back(wall4);
+
+  return vec;
 }

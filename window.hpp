@@ -4,8 +4,8 @@
 
 #include <vector>
 
-const int WINDOW_HEIGHT = 1000;
-const int WINDOW_WIDTH = 1500;
+const int WINDOW_HEIGHT = 1080;
+const int WINDOW_WIDTH = 1920;
 
 class Window {
 public:
@@ -21,7 +21,7 @@ public:
     this->pollEvents();
     // this->updateMouse();
   }
-  void render(std::vector<Food> foods, std::vector<Ant> ants, std::vector<Pharamone> wanderPharamones, std::vector<Pharamone> foodPharamones) {
+  void render(std::vector<Food> foods, std::vector<Ant> ants, std::vector<Pharamone> wanderPharamones, std::vector<Pharamone> foodPharamones, std::vector<sf::RectangleShape> walls) {
     this->window->clear(this->colBG);
     
     for (int i=0; i<foods.size(); i++) {
@@ -42,6 +42,10 @@ public:
     
     for (int i=0; i<foodPharamones.size(); i++) {
       this->window->draw(foodPharamones[i].getCircle());
+    }
+    
+    for (int i=0; i<walls.size(); i++) {
+      this->window->draw(walls[i]);
     }
     
     this->window->display();

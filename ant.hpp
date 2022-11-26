@@ -10,19 +10,19 @@
 #include <iostream>
 
 const float RAD = 57.29577;
-const int PHARAMONE_FREQUENCY = 30;
+const int PHARAMONE_FREQUENCY = 40;
 
 class Ant {
 public:
   Ant(int x, int y, float visionRadius) {
-    this->boundingBox.setPosition(sf::Vector2f(x, y));
+    this->boundingBox.setPosition(sf::Vector2f(x, y+1));
     
     this->visionCircle.setPosition(sf::Vector2f(x - visionRadius, y - visionRadius));
     this->visionCircle.setRadius(visionRadius);
     
     this->visionCircle.setFillColor(sf::Color(0, 0, 200, 20));
     
-    this->boundingBox.setSize(sf::Vector2f(10, 2));
+    this->boundingBox.setSize(sf::Vector2f(10, 3));
     this->boundingBox.setRotation(this->angle);
 
     std::random_device rd;
@@ -40,11 +40,12 @@ public:
   
   sf::CircleShape getFood() { return this->food; }
   
-  void update(std::vector<Food>& foods, std::vector<Pharamone>& wanderPharamones, std::vector<Pharamone>& foodPharamones) {
+  void update(std::vector<Food>& foods, std::vector<Pharamone>& wanderPharamones, std::vector<Pharamone>& foodPharamones, std::vector<sf::RectangleShape> walls) {
     switch (this->state) {
       case wandering:
         this->wander();
         this->move();
+        this->checkCollisions(walls);
         this->spawnPharamoneWander(wanderPharamones);
         for (int i=0; i<foods.size(); i++) {
           int checkFoodx = foods[i].getCoordsX();
@@ -77,12 +78,14 @@ public:
           this->setState(returning);
         } else {
           this->move();
+          this->checkCollisions(walls);
           this->spawnPharamoneWander(wanderPharamones);
         }
         break;
       case returning:
         this->wander();
         this->moveWithFood();
+        this->checkCollisions(walls);
         this->spawnPharamoneFood(foodPharamones);
         for (int i=0; i<wanderPharamones.size(); i++) {
           int checkPharamonex = wanderPharamones[i].getCoordsX();
@@ -101,6 +104,7 @@ public:
           this->setState(wandering);
         } else {
           this->move();
+          this->checkCollisions(walls);
           this->spawnPharamoneWander(wanderPharamones);
         }
         break;
@@ -110,6 +114,7 @@ public:
           this->setState(returning);
         } else {
           this->moveWithFood();
+          this->checkCollisions(walls);
           this->spawnPharamoneFood(foodPharamones);
         }
         break;
@@ -158,6 +163,8 @@ public:
     float y = (sin(this->angle / RAD)) * this->speed;
     this->boundingBox.move(sf::Vector2f(x, y));
     this->visionCircle.move(sf::Vector2f(x, y));
+    this->currentx = this->boundingBox.getPosition().x;
+    this->currenty = this->boundingBox.getPosition().y;
   }
   
   void moveWithFood() {
@@ -168,19 +175,35 @@ public:
     this->food.move(x, y);
   }
   
+  void checkCollisions(std::vector<sf::RectangleShape> walls) {
+    for (int i=0; i<walls.size(); i++) {
+      if (walls[i].getGlobalBounds().contains(this->currentx, this->currenty)) {
+        this->angle += 180;
+      }
+    }
+  }
+  
   void alignAngleToTarget() {
-    int currentx = this->boundingBox.getPosition().x;
-    int currenty = this->boundingBox.getPosition().y;
+    float xlen = abs(this->currentx - this->targetx);
+    float ylen = abs(this->currenty - this->targety);
     
-    int xlen; int ylen;
-    xlen = currentx - this->targetx;
-    ylen = currenty - this->targety;
-    
-    // if (currentx < foodx) {
-    // } else {
-    // }
-    this->angle = atan(ylen / xlen) * RAD;
-    // std::cout << "current : " << posx << ", " << posy << " food : " << foodx << ", " << foody << " length : " << xlen << ", " << ylen << " angle : " << this->angle << std::endl;
+    if (currentx < this->targetx && currenty < this->targety) {
+      if (currenty < this->targety) {
+        // down and right
+        this->angle = atan(xlen / ylen) * RAD;
+      } else {
+        // up and right
+        this->angle = abs((atan(ylen / xlen) * RAD) - 90);
+      }
+    } else {
+      if (currenty > this->targety) {
+        // up and left
+        this->angle = abs((atan(xlen / ylen) * RAD) - 90);
+      } else {
+        // down and left
+        this->angle = abs((atan(ylen / xlen) * RAD) - 180);
+      }
+    }
     
     this->boundingBox.setRotation(this->angle);
   }
@@ -218,12 +241,15 @@ private:
   float angle;
   // float acceleration = 5;
   float turning = 0;
-  float speed = 1.5;
+  const float speed = 1.5;
   
   int pharamoneTimer = PHARAMONE_FREQUENCY;
   
   sf::CircleShape food;
   // int foodIndex;
+  
+  int currentx;
+  int currenty;
   
   int targetx;
   int targety;
@@ -246,8 +272,8 @@ private:
     } else if (this->state == seeFoodPharamone && newState == wandering) {
       this->state = wandering;
     } else if (this->state == seeFood && newState == returning) {
-      this->angle -= 180;
-      this->visionCircle.setFillColor(sf::Color(0, 0, 200, 20));
+      this->angle += 180;
+      this->visionCircle.setFillColor(sf::Color(0, 200, 0, 20));
 
       this->state = returning;
     } else if (this->state == returning && newState == seeWanderPharamone) {
