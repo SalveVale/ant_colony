@@ -4,25 +4,32 @@
 
 #include "food.hpp"
 #include "pharamone.hpp"
+#include "nest.hpp"
 
 #include <math.h>
 #include <random>
 #include <iostream>
 
 const float RAD = 57.29577;
-const int PHARAMONE_FREQUENCY = 40;
+
+const int VISION_RADIUS_WANDER = 40;
+const int VISION_RADIUS_FOOD = 15;
+
+//higher is less frequent
+const int PHARAMONE_FREQUENCY_WANDER = 70;
+const int PHARAMONE_FREQUENCY_FOOD = 40;
 
 class Ant {
 public:
-  Ant(int x, int y, float visionRadius) {
-    this->boundingBox.setPosition(sf::Vector2f(x, y+1));
+  Ant(int x, int y) {
+    this->boundingBox.setPosition(sf::Vector2f(x, y-2));
     
-    this->visionCircle.setPosition(sf::Vector2f(x - visionRadius, y - visionRadius));
-    this->visionCircle.setRadius(visionRadius);
+    this->visionCircle.setPosition(sf::Vector2f(x - VISION_RADIUS_WANDER, y - VISION_RADIUS_WANDER));
+    this->visionCircle.setRadius(VISION_RADIUS_WANDER);
     
     this->visionCircle.setFillColor(sf::Color(0, 0, 200, 20));
     
-    this->boundingBox.setSize(sf::Vector2f(10, 3));
+    this->boundingBox.setSize(sf::Vector2f(10, 5));
     this->boundingBox.setRotation(this->angle);
 
     std::random_device rd;
@@ -40,7 +47,7 @@ public:
   
   sf::CircleShape getFood() { return this->food; }
   
-  void update(std::vector<Food>& foods, std::vector<Pharamone>& wanderPharamones, std::vector<Pharamone>& foodPharamones, std::vector<sf::RectangleShape> walls) {
+  void update(std::vector<Food>& foods, std::vector<Pharamone>& wanderPharamones, std::vector<Pharamone>& foodPharamones, std::vector<sf::RectangleShape> walls, Nest *nest) {
     switch (this->state) {
       case wandering:
         this->wander();
@@ -65,10 +72,12 @@ public:
           int checkPharamonex = foodPharamones[i].getCoordsX();
           int checkPharamoney = foodPharamones[i].getCoordsY();
           if (this->visionCircle.getGlobalBounds().contains(checkPharamonex, checkPharamoney)) {
-            this->targetPharamoneIndex = i;
+            // this->targetPharamoneIndex = i;
+            foodPharamones.erase(foodPharamones.begin() + i);
             this->targetx = checkPharamonex;
             this->targety = checkPharamoney;
-            this->setState(seeFoodPharamone);
+            this->alignAngleToTarget();
+            // this->setState(seeFoodPharamone);
             break;
           }
         }
@@ -86,15 +95,21 @@ public:
         this->wander();
         this->moveWithFood();
         this->checkCollisions(walls);
+        if (nest->getCircle().getGlobalBounds().contains(this->currentx, this->currenty)) {
+          this->setState(wandering);
+          break;
+        }
         this->spawnPharamoneFood(foodPharamones);
         for (int i=0; i<wanderPharamones.size(); i++) {
           int checkPharamonex = wanderPharamones[i].getCoordsX();
           int checkPharamoney = wanderPharamones[i].getCoordsY();
           if (this->visionCircle.getGlobalBounds().contains(checkPharamonex, checkPharamoney)) {
-            this->targetPharamoneIndex = i;
+            wanderPharamones.erase(wanderPharamones.begin() + i);
+            // this->targetPharamoneIndex = i;
             this->targetx = checkPharamonex;
             this->targety = checkPharamoney;
-            this->setState(seeWanderPharamone);
+            this->alignAngleToTarget();
+            // this->setState(seeWanderPharamone);
             break;
           }
         }
@@ -172,6 +187,8 @@ public:
     float y = (sin(this->angle / RAD)) * this->speed;
     this->boundingBox.move(sf::Vector2f(x, y));
     this->visionCircle.move(sf::Vector2f(x, y));
+    this->currentx = this->boundingBox.getPosition().x;
+    this->currenty = this->boundingBox.getPosition().y;
     this->food.move(x, y);
   }
   
@@ -187,21 +204,21 @@ public:
     float xlen = abs(this->currentx - this->targetx);
     float ylen = abs(this->currenty - this->targety);
     
-    if (currentx < this->targetx && currenty < this->targety) {
+    if (currentx < this->targetx) {
       if (currenty < this->targety) {
         // down and right
-        this->angle = atan(xlen / ylen) * RAD;
+        this->angle = (atan(xlen / ylen) * RAD);
       } else {
         // up and right
-        this->angle = abs((atan(ylen / xlen) * RAD) - 90);
+        this->angle = (atan(ylen / xlen) * RAD) - 90;
       }
     } else {
-      if (currenty > this->targety) {
-        // up and left
-        this->angle = abs((atan(xlen / ylen) * RAD) - 90);
-      } else {
+      if (currenty < this->targety) {
         // down and left
-        this->angle = abs((atan(ylen / xlen) * RAD) - 180);
+        this->angle = (atan(xlen / ylen) * RAD) + 90;
+      } else {
+        // up and left
+        this->angle = (atan(ylen / xlen) * RAD) + 180;
       }
     }
     
@@ -210,7 +227,7 @@ public:
   
   void spawnPharamoneWander(std::vector<Pharamone>& wanderPharamones) {
     if (this->pharamoneTimer == 0) {
-      this->pharamoneTimer = PHARAMONE_FREQUENCY;
+      this->pharamoneTimer = this->pharamoneFrequency;
       
       Pharamone *pharamone = new WanderPharamone(this->boundingBox.getPosition().x, this->boundingBox.getPosition().y);
       wanderPharamones.push_back(*pharamone);
@@ -219,7 +236,7 @@ public:
   
   void spawnPharamoneFood(std::vector<Pharamone>& foodPharamones) {
     if (this->pharamoneTimer == 0) {
-      this->pharamoneTimer = PHARAMONE_FREQUENCY;
+      this->pharamoneTimer = this->pharamoneFrequency;
       
       FoodPharamone *pharamone = new FoodPharamone(this->boundingBox.getPosition().x, this->boundingBox.getPosition().y);
       foodPharamones.push_back(*pharamone);
@@ -243,7 +260,8 @@ private:
   float turning = 0;
   const float speed = 1.5;
   
-  int pharamoneTimer = PHARAMONE_FREQUENCY;
+  int pharamoneFrequency = PHARAMONE_FREQUENCY_WANDER;
+  int pharamoneTimer = PHARAMONE_FREQUENCY_WANDER;
   
   sf::CircleShape food;
   // int foodIndex;
@@ -272,7 +290,10 @@ private:
     } else if (this->state == seeFoodPharamone && newState == wandering) {
       this->state = wandering;
     } else if (this->state == seeFood && newState == returning) {
-      this->angle += 180;
+      this->pharamoneFrequency = PHARAMONE_FREQUENCY_FOOD;
+      this->angle = this->angle - 180;
+      this->visionCircle.setRadius(VISION_RADIUS_FOOD);
+      this->visionCircle.move(25, 25);
       this->visionCircle.setFillColor(sf::Color(0, 200, 0, 20));
 
       this->state = returning;
@@ -281,6 +302,11 @@ private:
       this->state = seeWanderPharamone;
     } else if (this->state == seeWanderPharamone && newState == returning) {
       this->state = returning;
+    } else if (this->state == returning && newState == wandering) {
+      this->visionCircle.setRadius(VISION_RADIUS_WANDER);
+      this->pharamoneFrequency = PHARAMONE_FREQUENCY_WANDER;
+      this->food.setFillColor(sf::Color::Transparent);
+      this->state = wandering;
     }
   }
 };

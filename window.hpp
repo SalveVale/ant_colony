@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include "ant.hpp"
 #include "food.hpp"
+#include "nest.hpp"
 
 #include <vector>
 
@@ -21,7 +22,7 @@ public:
     this->pollEvents();
     // this->updateMouse();
   }
-  void render(std::vector<Food> foods, std::vector<Ant> ants, std::vector<Pharamone> wanderPharamones, std::vector<Pharamone> foodPharamones, std::vector<sf::RectangleShape> walls) {
+  void render(std::vector<Food> foods, std::vector<Ant> ants, std::vector<Pharamone> wanderPharamones, std::vector<Pharamone> foodPharamones, std::vector<sf::RectangleShape> walls, Nest *nest) {
     this->window->clear(this->colBG);
     
     for (int i=0; i<foods.size(); i++) {
@@ -47,6 +48,8 @@ public:
     for (int i=0; i<walls.size(); i++) {
       this->window->draw(walls[i]);
     }
+    
+    this->window->draw(nest->getCircle());
     
     this->window->display();
   }
