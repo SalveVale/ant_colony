@@ -29,7 +29,7 @@ int main() {
   // }
   for(int i=0; i<5; i++) {
     for(int j=0; j<5; j++) {
-      Food *food = new Food(900 + (8 * i), 900 + (8 * j));
+      Food *food = new Food(900 + (8 * i), 1000 + (8 * j));
       foods.push_back(*food);
     }
   }
@@ -43,7 +43,7 @@ int main() {
   Nest *nest1 = new Nest(700, 500);
   
   std::vector<Ant> ants;
-  for (int i=0; i<55; i++) {
+  for (int i=0; i<100; i++) {
     Ant *ant = new Ant(700, 500);
     ants.push_back(*ant);
   }
@@ -78,7 +78,7 @@ int main() {
 
 std::vector<sf::RectangleShape> initWalls(std::vector<sf::RectangleShape>& vec) {
   sf::RectangleShape wall1;
-  wall1.setPosition(200, 0);
+  wall1.setPosition(400, 0);
   wall1.setSize(sf::Vector2f(20, 1080));
   wall1.setFillColor(WALL_COLOR);
   vec.push_back(wall1);
@@ -96,7 +96,7 @@ std::vector<sf::RectangleShape> initWalls(std::vector<sf::RectangleShape>& vec) 
   vec.push_back(wall3);
 
   sf::RectangleShape wall4;
-  wall4.setPosition(1900, 1080);
+  wall4.setPosition(950, 1080);
   wall4.setSize(sf::Vector2f(20, -1080));
   wall4.setFillColor(WALL_COLOR);
   vec.push_back(wall4);

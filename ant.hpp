@@ -12,17 +12,17 @@
 
 const float RAD = 57.29577;
 
-const int VISION_RADIUS_WANDER = 40;
+const int VISION_RADIUS_WANDER = 30;
 const int VISION_RADIUS_FOOD = 15;
 
 //higher is less frequent
-const int PHARAMONE_FREQUENCY_WANDER = 70;
+const int PHARAMONE_FREQUENCY_WANDER = 90;
 const int PHARAMONE_FREQUENCY_FOOD = 40;
 
 class Ant {
 public:
   Ant(int x, int y) {
-    this->boundingBox.setPosition(sf::Vector2f(x, y-2));
+    this->boundingBox.setPosition(sf::Vector2f(x, y));
     
     this->visionCircle.setPosition(sf::Vector2f(x - VISION_RADIUS_WANDER, y - VISION_RADIUS_WANDER));
     this->visionCircle.setRadius(VISION_RADIUS_WANDER);
@@ -96,6 +96,7 @@ public:
         this->moveWithFood();
         this->checkCollisions(walls);
         if (nest->getCircle().getGlobalBounds().contains(this->currentx, this->currenty)) {
+          nest->addFood();
           this->setState(wandering);
           break;
         }
@@ -258,7 +259,7 @@ private:
   float angle;
   // float acceleration = 5;
   float turning = 0;
-  const float speed = 1.5;
+  const float speed = 2.5;
   
   int pharamoneFrequency = PHARAMONE_FREQUENCY_WANDER;
   int pharamoneTimer = PHARAMONE_FREQUENCY_WANDER;
@@ -293,7 +294,7 @@ private:
       this->pharamoneFrequency = PHARAMONE_FREQUENCY_FOOD;
       this->angle = this->angle - 180;
       this->visionCircle.setRadius(VISION_RADIUS_FOOD);
-      this->visionCircle.move(25, 25);
+      this->visionCircle.move(VISION_RADIUS_FOOD, VISION_RADIUS_FOOD);
       this->visionCircle.setFillColor(sf::Color(0, 200, 0, 20));
 
       this->state = returning;
@@ -304,6 +305,7 @@ private:
       this->state = returning;
     } else if (this->state == returning && newState == wandering) {
       this->visionCircle.setRadius(VISION_RADIUS_WANDER);
+      this->visionCircle.move(-VISION_RADIUS_FOOD, -VISION_RADIUS_FOOD);
       this->pharamoneFrequency = PHARAMONE_FREQUENCY_WANDER;
       this->food.setFillColor(sf::Color::Transparent);
       this->state = wandering;

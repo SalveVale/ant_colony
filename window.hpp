@@ -50,6 +50,7 @@ public:
     }
     
     this->window->draw(nest->getCircle());
+    this->window->draw(nest->getText());
     
     this->window->display();
   }
