@@ -17,7 +17,7 @@ const int VISION_RADIUS_FOOD = 15;
 
 //higher is less frequent
 const int PHARAMONE_FREQUENCY_WANDER = 90;
-const int PHARAMONE_FREQUENCY_FOOD = 40;
+const int PHARAMONE_FREQUENCY_FOOD = 30;
 
 class Ant {
 public:
@@ -69,8 +69,8 @@ public:
           }
         }
         for (int i=0; i<foodPharamones.size(); i++) {
-          int checkPharamonex = foodPharamones[i].getCoordsX();
-          int checkPharamoney = foodPharamones[i].getCoordsY();
+          int checkPharamonex = foodPharamones[i].getCoordsX() - 3;
+          int checkPharamoney = foodPharamones[i].getCoordsY() - 3;
           if (this->visionCircle.getGlobalBounds().contains(checkPharamonex, checkPharamoney)) {
             // this->targetPharamoneIndex = i;
             foodPharamones.erase(foodPharamones.begin() + i);
@@ -197,31 +197,79 @@ public:
     for (int i=0; i<walls.size(); i++) {
       if (walls[i].getGlobalBounds().contains(this->currentx, this->currenty)) {
         this->angle += 180;
+        if (this->hasFood) {
+          this->moveWithFood();
+        } else {
+          this->move();
+        }
       }
     }
   }
   
   void alignAngleToTarget() {
-    float xlen = abs(this->currentx - this->targetx);
-    float ylen = abs(this->currenty - this->targety);
+    // float xlen = abs(this->currentx - this->targetx);
+    // float ylen = abs(this->currenty - this->targety);
     
-    if (currentx < this->targetx) {
-      if (currenty < this->targety) {
-        // down and right
-        this->angle = (atan(xlen / ylen) * RAD);
-      } else {
-        // up and right
-        this->angle = (atan(ylen / xlen) * RAD) - 90;
-      }
+    // if (this->currentx < this->targetx) {
+    //   if (this->currenty < this->targety) {
+    //     // down and right
+    //     this->angle = (atan(xlen / ylen) * RAD);
+    //   } else {
+    //     // up and right
+    //     this->angle = (atan(ylen / xlen) * RAD) - 90;
+    //   }
+    // } else {
+    //   if (this->currenty < this->targety) {
+    //     // down and left
+    //     this->angle = (atan(xlen / ylen) * RAD) + 90;
+    //   } else {
+    //     // up and left
+    //     this->angle = (atan(ylen / xlen) * RAD) + 180;
+    //   }
+    // }
+    
+    // float xlen; float ylen;
+    // if (this->currentx < this->targetx) {
+    //   if (this->currenty < this->targety) {
+    //     // down and right
+    //     xlen = this->targetx - this->currentx;
+    //     ylen = this->targety - this->currenty;
+    //     this->angle = atan(ylen / xlen) * RAD;
+    //   } else {
+    //     // up and right
+    //     xlen = this->currentx - this->targetx;
+    //     ylen = this->currenty - this->targety;
+    //     this->angle = atan(ylen / xlen) * RAD;
+    //   }
+    // } else {
+    //   if (this->currenty < this->targety) {
+    //     // down and left
+    //     xlen = this->targetx - this->currentx; 
+    //     ylen = this->targety - this->currenty;
+    //     this->angle = atan(ylen / xlen) + 180;
+    //   } else {
+    //     // up and left
+    //     xlen = this->currentx - this->targetx;
+    //     ylen = this->currentx - this->targety;
+    //     this->angle = atan(ylen / xlen) + 180;
+    //   }
+    // }
+    
+    float xlen; float ylen;
+    if (this->currentx < this->targetx) {
+      xlen = this->targetx - this->currentx;
+      ylen = this->targety - this->currenty;
     } else {
-      if (currenty < this->targety) {
-        // down and left
-        this->angle = (atan(xlen / ylen) * RAD) + 90;
-      } else {
-        // up and left
-        this->angle = (atan(ylen / xlen) * RAD) + 180;
-      }
+      xlen = this->currentx - this->targetx;
+      ylen = this->currenty - this->targety;
     }
+    this->angle = atan(ylen / xlen) * RAD;
+    
+    if (this->currentx > this->targetx) {
+      this->angle += 180;
+    }
+
+    // std::cout << this->angle << std::endl;
     
     this->boundingBox.setRotation(this->angle);
   }

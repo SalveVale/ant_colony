@@ -31,7 +31,7 @@ public:
     
     for (int i=0; i<ants.size(); i++) {
       this->window->draw(ants[i].getSprite());
-      this->window->draw(ants[i].getCircle());
+      // this->window->draw(ants[i].getCircle());
       if (ants[i].hasFood) {
         this->window->draw(ants[i].getFood());
       }
@@ -77,7 +77,7 @@ private:
     this->videoMode.width = WINDOW_WIDTH;
     
     this->window = new sf::RenderWindow(this->videoMode, "Ant Colony Simulation");
-    this->window->setFramerateLimit(60);
+    this->window->setFramerateLimit(120);
   }
   
   void pollEvents() {

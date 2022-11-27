@@ -9,6 +9,9 @@ const sf::Color WALL_COLOR = sf::Color(10, 10, 10, 255);
 std::vector<sf::RectangleShape> initWalls(std::vector<sf::RectangleShape>& vec);
 
 int main() {
+  sf::Font font;
+  font.loadFromFile("Roboto-Bold.tff");
+
   Window window;
   
   std::vector<sf::RectangleShape> walls;
@@ -40,10 +43,10 @@ int main() {
   //   }
   // }
   
-  Nest *nest1 = new Nest(700, 500);
+  Nest *nest1 = new Nest(700, 500, font);
   
   std::vector<Ant> ants;
-  for (int i=0; i<100; i++) {
+  for (int i=0; i<31; i++) {
     Ant *ant = new Ant(700, 500);
     ants.push_back(*ant);
   }
@@ -78,13 +81,13 @@ int main() {
 
 std::vector<sf::RectangleShape> initWalls(std::vector<sf::RectangleShape>& vec) {
   sf::RectangleShape wall1;
-  wall1.setPosition(400, 0);
+  wall1.setPosition(0, 0);
   wall1.setSize(sf::Vector2f(20, 1080));
   wall1.setFillColor(WALL_COLOR);
   vec.push_back(wall1);
 
   sf::RectangleShape wall2;
-  wall2.setPosition(0, 200);
+  wall2.setPosition(0, 0);
   wall2.setSize(sf::Vector2f(1920, 20));
   wall2.setFillColor(WALL_COLOR);
   vec.push_back(wall2);
@@ -96,7 +99,7 @@ std::vector<sf::RectangleShape> initWalls(std::vector<sf::RectangleShape>& vec) 
   vec.push_back(wall3);
 
   sf::RectangleShape wall4;
-  wall4.setPosition(950, 1080);
+  wall4.setPosition(1900, 1080);
   wall4.setSize(sf::Vector2f(20, -1080));
   wall4.setFillColor(WALL_COLOR);
   vec.push_back(wall4);

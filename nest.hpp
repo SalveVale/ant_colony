@@ -8,9 +8,12 @@ const float RADIUS = 50;
 
 class Nest {
 public:
-  Nest(int x, int y) {
-    if (!this->font.loadFromFile("resources/Roboto/Roboto-Bold.tff")) std::cout << "Failed to load font" << std::endl;
-    this->foodCountText.setFont(this->font);
+  Nest(int x, int y, sf::Font font) {
+    // if (!this->font.loadFromFile("resources/Roboto/Roboto-Bold.tff")) std::cout << "Failed to load font" << std::endl;
+    // this->font.loadFromFile("resources/Roboto/Roboto-Regular.tff");
+    // this->font.loadFromFile("Roboto-Bold.tff");
+    // if (!this->font.loadFromFile("Roboto-Bold.tff")) std::cout << "Failed to load font";
+    this->foodCountText.setFont(font);
     this->foodCountText.setCharacterSize(12);
     this->foodCountText.setPosition(x, y);
     this->foodCountText.setString("0");
@@ -27,6 +30,7 @@ public:
   void addFood() {
     this->foodCount++;
     this->foodCountText.setString(std::to_string(this->foodCount));
+    std::cout << this->foodCount << std::endl;
   }
 private:
   sf::CircleShape circle;
@@ -34,6 +38,6 @@ private:
   int foodCount = 0;
   
   // static sf::Font font;
-  sf::Font font;
+  // sf::Font font;
   sf::Text foodCountText;
 };
