@@ -49,6 +49,7 @@ public:
       this->window->draw(walls[i]);
     }
     
+    // this->window->draw(nest->getVisionRadius());
     this->window->draw(nest->getCircle());
     this->window->draw(nest->getText());
     

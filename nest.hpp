@@ -5,6 +5,7 @@
 #include <iostream>
 
 const float RADIUS = 50;
+const float NEST_VISION_RADIUS = 150;
 
 class Nest {
 public:
@@ -21,11 +22,22 @@ public:
     this->circle.setPosition(x - RADIUS, y - RADIUS);
     this->circle.setRadius(RADIUS);
     this->circle.setFillColor(sf::Color(100, 100, 50, 255));
+    
+    this->visionRadius.setPosition(x - NEST_VISION_RADIUS, y - NEST_VISION_RADIUS);
+    this->visionRadius.setRadius(NEST_VISION_RADIUS);
+    this->visionRadius.setFillColor(sf::Color(100, 100, 50, 40));
+    
+    this->posx = x - RADIUS;
+    this->posy = y - RADIUS;
   }
   ~Nest() {}
   
   sf::CircleShape getCircle() { return this->circle; }
+  sf::CircleShape getVisionRadius() { return this->visionRadius; }
   sf::Text getText() { return this->foodCountText; }
+  
+  int getCoordsX() { return this->posx; }
+  int getCoordsY() { return this->posy; }
   
   void addFood() {
     this->foodCount++;
@@ -34,6 +46,10 @@ public:
   }
 private:
   sf::CircleShape circle;
+  sf::CircleShape visionRadius;
+  
+  int posx;
+  int posy;
   
   int foodCount = 0;
   

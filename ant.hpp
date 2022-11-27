@@ -95,11 +95,15 @@ public:
         this->wander();
         this->moveWithFood();
         this->checkCollisions(walls);
-        if (nest->getCircle().getGlobalBounds().contains(this->currentx, this->currenty)) {
-          nest->addFood();
-          this->setState(wandering);
-          break;
+        if (nest->getVisionRadius().getGlobalBounds().contains(this->currentx, this->currenty)) {
+          this->targetx = nest->getCoordsX();
+          this->targety = nest->getCoordsY();
+          this->setState(seeNest);
         }
+        // if (nest->getCircle().getGlobalBounds().contains(this->currentx, this->currenty)) {
+        //   nest->addFood();
+        //   this->setState(wandering);
+        // }
         this->spawnPharamoneFood(foodPharamones);
         for (int i=0; i<wanderPharamones.size(); i++) {
           int checkPharamonex = wanderPharamones[i].getCoordsX();
@@ -115,25 +119,32 @@ public:
           }
         }
         break;
-      case seeFoodPharamone:
-        if (this->boundingBox.getGlobalBounds().contains(this->targetx, this->targety)) {
+      case seeNest:
+        this->moveWithFood();
+        if (nest->getCircle().getGlobalBounds().contains(this->currentx, this->currenty)) {
+          nest->addFood();
           this->setState(wandering);
-        } else {
-          this->move();
-          this->checkCollisions(walls);
-          this->spawnPharamoneWander(wanderPharamones);
         }
         break;
-      case seeWanderPharamone:
-        if (this->boundingBox.getGlobalBounds().contains(this->targetx, this->targety)) {
-          wanderPharamones.erase(wanderPharamones.begin() + this->targetPharamoneIndex);
-          this->setState(returning);
-        } else {
-          this->moveWithFood();
-          this->checkCollisions(walls);
-          this->spawnPharamoneFood(foodPharamones);
-        }
-        break;
+      // case seeFoodPharamone:
+      //   if (this->boundingBox.getGlobalBounds().contains(this->targetx, this->targety)) {
+      //     this->setState(wandering);
+      //   } else {
+      //     this->move();
+      //     this->checkCollisions(walls);
+      //     this->spawnPharamoneWander(wanderPharamones);
+      //   }
+      //   break;
+      // case seeWanderPharamone:
+      //   if (this->boundingBox.getGlobalBounds().contains(this->targetx, this->targety)) {
+      //     wanderPharamones.erase(wanderPharamones.begin() + this->targetPharamoneIndex);
+      //     this->setState(returning);
+      //   } else {
+      //     this->moveWithFood();
+      //     this->checkCollisions(walls);
+      //     this->spawnPharamoneFood(foodPharamones);
+      //   }
+      //   break;
     }
 
     this->pharamoneTimer--;
@@ -157,7 +168,7 @@ public:
     if ((this->turning > 0 && this->turning < 0.0125) || (this->turning < 0 && this->turning > -0.0125) || this->turning == 0) {
       std::random_device rd;
       std::default_random_engine eng(rd());
-      std::uniform_int_distribution<int> distr(-3, 3);
+      std::uniform_int_distribution<int> distr(-2, 2);
       this->turning = distr(eng);
     }
     // if (this->acceleration < 1.125) {
@@ -169,7 +180,7 @@ public:
     this->boundingBox.setRotation(this->angle);
     // this->move();
     this->angle += turning;
-    this->turning /= 1.07;
+    this->turning /= 1.09;
     // this->speed += this->acceleration;
     // this->acceleration /= 1.005;
   }
@@ -295,9 +306,10 @@ private:
   enum states {
     wandering,
     seeFood,
-    seeWanderPharamone,
-    seeFoodPharamone,
+    // seeWanderPharamone,
+    // seeFoodPharamone,
     returning,
+    seeNest,
   } state = wandering;
   
   // sf::Sprite sprite;
@@ -333,11 +345,11 @@ private:
       this->hasFood = true;
 
       this->state = seeFood;
-    } else if (this->state == wandering && newState == seeFoodPharamone) {
-      this->alignAngleToTarget();
-      this->state = seeFoodPharamone;
-    } else if (this->state == seeFoodPharamone && newState == wandering) {
-      this->state = wandering;
+    // } else if (this->state == wandering && newState == seeFoodPharamone) {
+    //   this->alignAngleToTarget();
+    //   this->state = seeFoodPharamone;
+    // } else if (this->state == seeFoodPharamone && newState == wandering) {
+    //   this->state = wandering;
     } else if (this->state == seeFood && newState == returning) {
       this->pharamoneFrequency = PHARAMONE_FREQUENCY_FOOD;
       this->angle = this->angle - 180;
@@ -346,12 +358,22 @@ private:
       this->visionCircle.setFillColor(sf::Color(0, 200, 0, 20));
 
       this->state = returning;
-    } else if (this->state == returning && newState == seeWanderPharamone) {
+    // } else if (this->state == returning && newState == seeWanderPharamone) {
+    //   this->alignAngleToTarget();
+    //   this->state = seeWanderPharamone;
+    // } else if (this->state == seeWanderPharamone && newState == returning) {
+    //   this->state = returning;
+    // } else if (this->state == returning && newState == wandering) {
+    //   this->visionCircle.setRadius(VISION_RADIUS_WANDER);
+    //   this->visionCircle.move(-VISION_RADIUS_FOOD, -VISION_RADIUS_FOOD);
+    //   this->pharamoneFrequency = PHARAMONE_FREQUENCY_WANDER;
+    //   this->food.setFillColor(sf::Color::Transparent);
+    //   this->state = wandering;
+    } else if (this->state == returning && newState == seeNest) {
       this->alignAngleToTarget();
-      this->state = seeWanderPharamone;
-    } else if (this->state == seeWanderPharamone && newState == returning) {
-      this->state = returning;
-    } else if (this->state == returning && newState == wandering) {
+      std::cout << this->angle << std::endl;
+      this->state = seeNest;
+    } else if (this->state == seeNest && newState == wandering) {
       this->visionCircle.setRadius(VISION_RADIUS_WANDER);
       this->visionCircle.move(-VISION_RADIUS_FOOD, -VISION_RADIUS_FOOD);
       this->pharamoneFrequency = PHARAMONE_FREQUENCY_WANDER;
