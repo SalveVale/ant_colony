@@ -22,7 +22,7 @@ public:
     this->pollEvents();
     // this->updateMouse();
   }
-  void render(std::vector<Food> foods, std::vector<Ant> redAnts, std::vector<Ant> blueAnts, std::vector<Pharamone> redWanderPharamones, std::vector<Pharamone> redFoodPharamones, std::vector<Pharamone> blueWanderPharamones, std::vector<Pharamone> blueFoodPharamones, std::vector<sf::RectangleShape> walls, Nest *redNest, Nest *blueNest) {
+  void render(std::vector<Food> foods, std::vector<Ant> redAnts, std::vector<Ant> blueAnts, std::vector<Pharamone> redWanderPharamones, std::vector<Pharamone> redFoodPharamones, std::vector<Pharamone> redDangerPharamones, std::vector<Pharamone> blueWanderPharamones, std::vector<Pharamone> blueFoodPharamones, std::vector<Pharamone> blueDangerPharamones, std::vector<sf::RectangleShape> walls, Nest *redNest, Nest *blueNest) {
     this->window->clear(this->colBG);
     
     for (int i=0; i<foods.size(); i++) {
@@ -53,12 +53,20 @@ public:
       this->window->draw(redFoodPharamones[i].getCircle());
     }
     
+    for (int i=0; i<redDangerPharamones.size(); i++) {
+      this->window->draw(redDangerPharamones[i].getCircle());
+    }
+    
     for (int i=0; i<blueWanderPharamones.size(); i++) {
       this->window->draw(blueWanderPharamones[i].getCircle());
     }
     
     for (int i=0; i<blueFoodPharamones.size(); i++) {
       this->window->draw(blueFoodPharamones[i].getCircle());
+    }
+    
+    for (int i=0; i<blueDangerPharamones.size(); i++) {
+      this->window->draw(blueDangerPharamones[i].getCircle());
     }
     
     for (int i=0; i<walls.size(); i++) {

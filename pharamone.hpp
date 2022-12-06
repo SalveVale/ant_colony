@@ -19,7 +19,7 @@ public:
   int getCoordsX() { return this->x; }
   int getCoordsY() { return this->y; }
   
-  sf::CircleShape getCircle() { return this->circle; }
+  sf::RectangleShape getCircle() { return this->circle; }
   
   bool isDespawned() {
     this->timer--;
@@ -30,7 +30,7 @@ public:
     }
   }
 protected:
-  sf::CircleShape circle;
+  sf::RectangleShape circle;
   sf::Color color = sf::Color(0, 0, 200, 255);
 
   int x;
@@ -43,8 +43,8 @@ class WanderPharamone : public Pharamone {
 public:
   WanderPharamone(int x, int y) {
     this->circle.setPosition(x ,y);
-    this->circle.setRadius(1.f);
-    this->circle.setFillColor(sf::Color(0, 0, 200, 255));
+    this->circle.setSize(sf::Vector2f(1, 1));
+    this->circle.setFillColor(sf::Color::Cyan);
     
     this->x = x;
     this->y = y;
@@ -56,11 +56,24 @@ class FoodPharamone : public Pharamone {
 public:
   FoodPharamone(int x, int y) {
     this->circle.setPosition(x ,y);
-    this->circle.setRadius(1.f);
+    this->circle.setSize(sf::Vector2f(1, 1));
     this->circle.setFillColor(sf::Color(200, 0, 0, 255));
     
     this->x = x;
     this->y = y;
   }
   ~FoodPharamone() {}
+};
+
+class DangerPharamone : public Pharamone {
+public:
+  DangerPharamone(int x, int y) {
+    this->circle.setPosition(x, y);
+    this->circle.setSize(sf::Vector2f(1, 1));
+    this->circle.setFillColor(sf::Color(200, 200, 0, 255));
+    
+    this->x = x;
+    this->y = y;
+  }
+  ~DangerPharamone() {}
 };

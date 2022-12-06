@@ -64,30 +64,20 @@ int main() {
   
   std::vector<Pharamone> redWanderPharamones;
   std::vector<Pharamone> redFoodPharamones;
+  std::vector<Pharamone> redDangerPharamones;
   std::vector<Pharamone> blueWanderPharamones;
   std::vector<Pharamone> blueFoodPharamones;
+  std::vector<Pharamone> blueDangerPharamones;
   
   while (window.isOpen()) {
     window.update();
     
     for (int i=0; i<redAnts.size(); i++) {
-      redAnts[i].update(foods, redWanderPharamones, redFoodPharamones, walls, redNest);
+      redAnts[i].update(foods, redWanderPharamones, redFoodPharamones, redDangerPharamones, walls, redNest, blueAnts);
     }
     
     for (int i=0; i<blueAnts.size(); i++) {
-      blueAnts[i].update(foods, blueWanderPharamones, blueFoodPharamones, walls, blueNest);
-    }
-    
-    for (int i=0; i<blueWanderPharamones.size(); i++) {
-      if (blueWanderPharamones[i].isDespawned()) {
-        blueWanderPharamones.erase(blueWanderPharamones.begin() + i);
-      }
-    }
-    
-    for (int i=0; i<blueFoodPharamones.size(); i++) {
-      if (blueFoodPharamones[i].isDespawned()) {
-        blueFoodPharamones.erase(blueFoodPharamones.begin() + i);
-      }
+      blueAnts[i].update(foods, blueWanderPharamones, blueFoodPharamones, blueDangerPharamones, walls, blueNest, redAnts);
     }
     
     for (int i=0; i<redWanderPharamones.size(); i++) {
@@ -102,7 +92,31 @@ int main() {
       }
     }
     
-    window.render(foods, redAnts, blueAnts, redWanderPharamones, redFoodPharamones, blueWanderPharamones, blueFoodPharamones, walls, redNest, blueNest);
+    for (int i=0; i<redDangerPharamones.size(); i++) {
+      if (redDangerPharamones[i].isDespawned()) {
+        redDangerPharamones.erase(redDangerPharamones.begin() + i);
+      }
+    }
+    
+    for (int i=0; i<blueWanderPharamones.size(); i++) {
+      if (blueWanderPharamones[i].isDespawned()) {
+        blueWanderPharamones.erase(blueWanderPharamones.begin() + i);
+      }
+    }
+    
+    for (int i=0; i<blueFoodPharamones.size(); i++) {
+      if (blueFoodPharamones[i].isDespawned()) {
+        blueFoodPharamones.erase(blueFoodPharamones.begin() + i);
+      }
+    }
+    
+    for (int i=0; i<blueDangerPharamones.size(); i++) {
+      if (blueDangerPharamones[i].isDespawned()) {
+        blueDangerPharamones.erase(blueDangerPharamones.begin() + i);
+      }
+    }
+    
+    window.render(foods, redAnts, blueAnts, redWanderPharamones, redFoodPharamones, redDangerPharamones, blueWanderPharamones, blueFoodPharamones, blueDangerPharamones, walls, redNest, blueNest);
   }
   
   return 0;

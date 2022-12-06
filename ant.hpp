@@ -18,6 +18,7 @@ const int VISION_RADIUS_FOOD = 15;
 //higher is less frequent
 const int PHARAMONE_FREQUENCY_WANDER = 90;
 const int PHARAMONE_FREQUENCY_FOOD = 30;
+const int PHARAMONE_FREQUENCY_DANGER = 10;
 
 class Ant {
 public:
@@ -47,13 +48,14 @@ public:
   
   sf::CircleShape getFood() { return this->food; }
   
-  void update(std::vector<Food>& foods, std::vector<Pharamone>& wanderPharamones, std::vector<Pharamone>& foodPharamones, std::vector<sf::RectangleShape> walls, Nest *nest) {
+  void update(std::vector<Food>& foods, std::vector<Pharamone>& wanderPharamones, std::vector<Pharamone>& foodPharamones, std::vector<Pharamone>& dangerPharamones, std::vector<sf::RectangleShape> walls, Nest *nest, std::vector<Ant> enemyAnts) {
     switch (this->state) {
       case wandering:
         this->wander();
         this->move();
         this->checkCollisions(walls);
         this->spawnPharamoneWander(wanderPharamones);
+        this->checkForEnemies(enemyAnts);
         for (int i=0; i<foods.size(); i++) {
           int checkFoodx = foods[i].getCoordsX();
           int checkFoody = foods[i].getCoordsY();
@@ -98,7 +100,7 @@ public:
         if (nest->getVisionRadius().getGlobalBounds().contains(this->currentx, this->currenty)) {
           this->targetx = nest->getCoordsX();
           this->targety = nest->getCoordsY();
-          this->setState(seeNest);
+          this->setState(seeNestReturning);
         }
         // if (nest->getCircle().getGlobalBounds().contains(this->currentx, this->currenty)) {
         //   nest->addFood();
@@ -119,11 +121,30 @@ public:
           }
         }
         break;
-      case seeNest:
+      case seeNestReturning:
         this->moveWithFood();
         this->spawnPharamoneFood(foodPharamones);
         if (nest->getCircle().getGlobalBounds().contains(this->currentx, this->currenty)) {
           nest->addFood();
+          this->setState(wandering);
+        }
+        break;
+      case fleeing:
+        this->wander();
+        this->move();
+        this->checkCollisions(walls);
+        if (nest->getVisionRadius().getGlobalBounds().contains(this->currentx, this->currenty)) {
+          this->targetx = nest->getCoordsX();
+          this->targety = nest->getCoordsY();
+          this->setState(seeNestFleeing);
+        }
+        this->spawnPharamoneDanger(dangerPharamones);
+        break;
+      case seeNestFleeing:
+        this->move();
+        this->spawnPharamoneDanger(dangerPharamones);
+        if (nest->getCircle().getGlobalBounds().contains(this->currentx, this->currenty)) {
+          //spawnWarrior();
           this->setState(wandering);
         }
         break;
@@ -164,6 +185,14 @@ public:
   //     }
   //   }
   // }
+  
+  void checkForEnemies(std::vector<Ant> enemyAnts) {
+    for (int i=0; i<enemyAnts.size(); i++) {
+      if (this->visionCircle.getGlobalBounds().contains(enemyAnts[i].getCoordsX(), enemyAnts[i].getCoordsY())) {
+        this->setState(fleeing);
+      }
+    }
+  }
   
   void wander() {
     if ((this->turning > 0 && this->turning < 0.0125) || (this->turning < 0 && this->turning > -0.0125) || this->turning == 0) {
@@ -290,7 +319,7 @@ public:
     if (this->pharamoneTimer == 0) {
       this->pharamoneTimer = this->pharamoneFrequency;
       
-      Pharamone *pharamone = new WanderPharamone(this->boundingBox.getPosition().x, this->boundingBox.getPosition().y);
+      WanderPharamone *pharamone = new WanderPharamone(this->currentx, this->currenty);
       wanderPharamones.push_back(*pharamone);
     }
   }
@@ -299,10 +328,22 @@ public:
     if (this->pharamoneTimer == 0) {
       this->pharamoneTimer = this->pharamoneFrequency;
       
-      FoodPharamone *pharamone = new FoodPharamone(this->boundingBox.getPosition().x, this->boundingBox.getPosition().y);
+      FoodPharamone *pharamone = new FoodPharamone(this->currentx, this->currenty);
       foodPharamones.push_back(*pharamone);
     }
   }
+  
+  void spawnPharamoneDanger(std::vector<Pharamone>& dangerPharamones) {
+    if (this->pharamoneTimer == 0) {
+      this->pharamoneTimer = this->pharamoneFrequency;
+      
+      DangerPharamone *pharamone = new DangerPharamone(this->currentx, this->currenty);
+      dangerPharamones.push_back(*pharamone);
+    }
+  }
+  
+  int getCoordsX() { return this->currentx; }
+  int getCoordsY() { return this->currenty; }
 protected:
   enum states {
     wandering,
@@ -310,7 +351,9 @@ protected:
     // seeWanderPharamone,
     // seeFoodPharamone,
     returning,
-    seeNest,
+    seeNestReturning,
+    fleeing,
+    seeNestFleeing,
   } state = wandering;
   
   // sf::Sprite sprite;
@@ -370,14 +413,24 @@ protected:
     //   this->pharamoneFrequency = PHARAMONE_FREQUENCY_WANDER;
     //   this->food.setFillColor(sf::Color::Transparent);
     //   this->state = wandering;
-    } else if (this->state == returning && newState == seeNest) {
+    } else if (this->state == returning && newState == seeNestReturning) {
       this->alignAngleToTarget();
-      this->state = seeNest;
-    } else if (this->state == seeNest && newState == wandering) {
+      this->state = seeNestReturning;
+    } else if (this->state == seeNestReturning && newState == wandering) {
       this->visionCircle.setRadius(VISION_RADIUS_WANDER);
       this->visionCircle.move(-VISION_RADIUS_FOOD, -VISION_RADIUS_FOOD);
       this->pharamoneFrequency = PHARAMONE_FREQUENCY_WANDER;
       this->food.setFillColor(sf::Color::Transparent);
+      this->state = wandering;
+    } else if (this->state == wandering && newState == fleeing) {
+      this->angle = this->angle - 180;
+      this->pharamoneFrequency = PHARAMONE_FREQUENCY_DANGER;
+      this->state = fleeing;
+    } else if (this->state == fleeing && newState == seeNestFleeing) {
+      this->alignAngleToTarget();
+      this->state = seeNestFleeing;
+    } else if (this->state == seeNestFleeing && newState == wandering) {
+      this->pharamoneFrequency = PHARAMONE_FREQUENCY_WANDER;
       this->state = wandering;
     }
   }
