@@ -21,23 +21,23 @@ const int PHARAMONE_FREQUENCY_FOOD = 30;
 
 class Ant {
 public:
-  Ant(int x, int y) {
-    this->boundingBox.setPosition(sf::Vector2f(x, y));
+  // Ant(int x, int y) {
+  //   this->boundingBox.setPosition(sf::Vector2f(x, y));
     
-    this->visionCircle.setPosition(sf::Vector2f(x - VISION_RADIUS_WANDER, y - VISION_RADIUS_WANDER));
-    this->visionCircle.setRadius(VISION_RADIUS_WANDER);
+  //   this->visionCircle.setPosition(sf::Vector2f(x - VISION_RADIUS_WANDER, y - VISION_RADIUS_WANDER));
+  //   this->visionCircle.setRadius(VISION_RADIUS_WANDER);
     
-    this->visionCircle.setFillColor(sf::Color(0, 0, 200, 20));
+  //   this->visionCircle.setFillColor(sf::Color(0, 0, 200, 20));
     
-    this->boundingBox.setSize(sf::Vector2f(10, 5));
-    this->boundingBox.setRotation(this->angle);
+  //   this->boundingBox.setSize(sf::Vector2f(10, 5));
+  //   this->boundingBox.setRotation(this->angle);
 
-    std::random_device rd;
-    std::default_random_engine eng(rd());
-    std::uniform_int_distribution<int> distr(0, 360);
-    this->angle = distr(eng);
-  }
-  ~Ant() {}
+  //   std::random_device rd;
+  //   std::default_random_engine eng(rd());
+  //   std::uniform_int_distribution<int> distr(0, 360);
+  //   this->angle = distr(eng);
+  // }
+  // ~Ant() {}
 
   bool hasFood = false;
   
@@ -121,6 +121,7 @@ public:
         break;
       case seeNest:
         this->moveWithFood();
+        this->spawnPharamoneFood(foodPharamones);
         if (nest->getCircle().getGlobalBounds().contains(this->currentx, this->currenty)) {
           nest->addFood();
           this->setState(wandering);
@@ -302,7 +303,7 @@ public:
       foodPharamones.push_back(*pharamone);
     }
   }
-private:
+protected:
   enum states {
     wandering,
     seeFood,
@@ -371,7 +372,6 @@ private:
     //   this->state = wandering;
     } else if (this->state == returning && newState == seeNest) {
       this->alignAngleToTarget();
-      std::cout << this->angle << std::endl;
       this->state = seeNest;
     } else if (this->state == seeNest && newState == wandering) {
       this->visionCircle.setRadius(VISION_RADIUS_WANDER);
@@ -381,4 +381,50 @@ private:
       this->state = wandering;
     }
   }
+};
+
+class Red_Ant : public Ant {
+public:
+Red_Ant(int x, int y) {
+    this->boundingBox.setPosition(sf::Vector2f(x, y));
+    this->boundingBox.setFillColor(sf::Color::Red);
+    
+    this->visionCircle.setPosition(sf::Vector2f(x - VISION_RADIUS_WANDER, y - VISION_RADIUS_WANDER));
+    this->visionCircle.setRadius(VISION_RADIUS_WANDER);
+    
+    this->visionCircle.setFillColor(sf::Color(0, 0, 200, 20));
+    
+    this->boundingBox.setSize(sf::Vector2f(10, 5));
+    this->boundingBox.setRotation(this->angle);
+
+    std::random_device rd;
+    std::default_random_engine eng(rd());
+    std::uniform_int_distribution<int> distr(0, 360);
+    this->angle = distr(eng);
+  }
+
+~Red_Ant() {}
+};
+
+class Blue_Ant : public Ant {
+public:
+Blue_Ant(int x, int y) {
+    this->boundingBox.setPosition(sf::Vector2f(x, y));
+    this->boundingBox.setFillColor(sf::Color::Blue);
+    
+    this->visionCircle.setPosition(sf::Vector2f(x - VISION_RADIUS_WANDER, y - VISION_RADIUS_WANDER));
+    this->visionCircle.setRadius(VISION_RADIUS_WANDER);
+    
+    this->visionCircle.setFillColor(sf::Color(0, 0, 200, 20));
+    
+    this->boundingBox.setSize(sf::Vector2f(10, 5));
+    this->boundingBox.setRotation(this->angle);
+
+    std::random_device rd;
+    std::default_random_engine eng(rd());
+    std::uniform_int_distribution<int> distr(0, 360);
+    this->angle = distr(eng);
+  }
+
+~Blue_Ant() {}
 };

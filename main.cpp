@@ -5,6 +5,10 @@
 #include "nest.hpp"
 
 const sf::Color WALL_COLOR = sf::Color(10, 10, 10, 255);
+const int RED_SPAWN_X = 200;
+const int RED_SPAWN_Y = 200;
+const int BLUE_SPAWN_X = 1800;
+const int BLUE_SPAWN_Y = 900;
 
 std::vector<sf::RectangleShape> initWalls(std::vector<sf::RectangleShape>& vec);
 
@@ -43,37 +47,62 @@ int main() {
   //   }
   // }
   
-  Nest *nest1 = new Nest(700, 500, font);
+  Nest *redNest = new Nest(RED_SPAWN_X, RED_SPAWN_Y, font);
+  Nest *blueNest = new Nest(BLUE_SPAWN_X, BLUE_SPAWN_Y, font);
   
-  std::vector<Ant> ants;
+  std::vector<Ant> redAnts;
   for (int i=0; i<31; i++) {
-    Ant *ant = new Ant(700, 500);
-    ants.push_back(*ant);
+    Red_Ant *ant = new Red_Ant(RED_SPAWN_X, RED_SPAWN_Y);
+    redAnts.push_back(*ant);
   }
   
-  std::vector<Pharamone> wanderPharamones;
-  std::vector<Pharamone> foodPharamones;
+  std::vector<Ant> blueAnts;
+  for (int i=0; i<20; i++) {
+    Blue_Ant *ant = new Blue_Ant(BLUE_SPAWN_X, BLUE_SPAWN_Y);
+    blueAnts.push_back(*ant);
+  }
+  
+  std::vector<Pharamone> redWanderPharamones;
+  std::vector<Pharamone> redFoodPharamones;
+  std::vector<Pharamone> blueWanderPharamones;
+  std::vector<Pharamone> blueFoodPharamones;
   
   while (window.isOpen()) {
     window.update();
     
-    for (int i=0; i<ants.size(); i++) {
-      ants[i].update(foods, wanderPharamones, foodPharamones, walls, nest1);
+    for (int i=0; i<redAnts.size(); i++) {
+      redAnts[i].update(foods, redWanderPharamones, redFoodPharamones, walls, redNest);
     }
     
-    for (int i=0; i<wanderPharamones.size(); i++) {
-      if (wanderPharamones[i].isDespawned()) {
-        wanderPharamones.erase(wanderPharamones.begin() + i);
+    for (int i=0; i<blueAnts.size(); i++) {
+      blueAnts[i].update(foods, blueWanderPharamones, blueFoodPharamones, walls, blueNest);
+    }
+    
+    for (int i=0; i<blueWanderPharamones.size(); i++) {
+      if (blueWanderPharamones[i].isDespawned()) {
+        blueWanderPharamones.erase(blueWanderPharamones.begin() + i);
       }
     }
     
-    for (int i=0; i<foodPharamones.size(); i++) {
-      if (foodPharamones[i].isDespawned()) {
-        foodPharamones.erase(foodPharamones.begin() + i);
+    for (int i=0; i<blueFoodPharamones.size(); i++) {
+      if (blueFoodPharamones[i].isDespawned()) {
+        blueFoodPharamones.erase(blueFoodPharamones.begin() + i);
       }
     }
     
-    window.render(foods, ants, wanderPharamones, foodPharamones, walls, nest1);
+    for (int i=0; i<redWanderPharamones.size(); i++) {
+      if (redWanderPharamones[i].isDespawned()) {
+        redWanderPharamones.erase(redWanderPharamones.begin() + i);
+      }
+    }
+    
+    for (int i=0; i<redFoodPharamones.size(); i++) {
+      if (redFoodPharamones[i].isDespawned()) {
+        redFoodPharamones.erase(redFoodPharamones.begin() + i);
+      }
+    }
+    
+    window.render(foods, redAnts, blueAnts, redWanderPharamones, redFoodPharamones, blueWanderPharamones, blueFoodPharamones, walls, redNest, blueNest);
   }
   
   return 0;
